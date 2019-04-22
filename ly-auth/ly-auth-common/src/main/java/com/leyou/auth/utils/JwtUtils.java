@@ -110,7 +110,7 @@ public class JwtUtils {
         );
     }
 
-    public static void main(String[] args) throws Exception {
+ /*   public static void main(String[] args) throws Exception {
         String publicKeyFileName = "C:\\lesson\\heima54\\ssh\\id_rsa.pub";
         String privateKeyFileName = "C:\\lesson\\heima54\\ssh\\id_rsa.pri";
         UserInfo userInfo = new UserInfo(1l, "Jack Chen");
@@ -119,5 +119,5 @@ public class JwtUtils {
         System.out.println("token = " + token);
         UserInfo user = getInfoFromToken(token, RsaUtils.getPublicKey(publicKeyFileName));
         System.out.println("user = " + user);
-    }
+    }*/
 }

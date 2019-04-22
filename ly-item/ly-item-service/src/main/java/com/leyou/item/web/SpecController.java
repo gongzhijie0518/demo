@@ -17,6 +17,7 @@ public class SpecController {
 
     /**
      * 根据分类id查询规格分组
+     *
      * @param cid
      * @return
      */
@@ -27,14 +28,26 @@ public class SpecController {
 
     /**
      * 根据组id查询规格参数
+     *
      * @param gid
      * @return
      */
     @GetMapping("params")
     public ResponseEntity<List<SpecParam>> queryParams(
-            @RequestParam(value = "cid",required = false)Long cid,
-            @RequestParam(value = "gid",required = false)Long gid,
-            @RequestParam(value = "searching",required = false)Boolean searching)                                     {
-        return ResponseEntity.ok(specService.queryParam(cid,gid,searching));
+            @RequestParam(value = "cid", required = false) Long cid,
+            @RequestParam(value = "gid", required = false) Long gid,
+            @RequestParam(value = "searching", required = false) Boolean searching) {
+        return ResponseEntity.ok(specService.queryParam(cid, gid, searching));
     }
+    /**
+     * 根据分类查询规格组及组内参数
+     * @param cid
+     * @return
+     */
+    @GetMapping("/list/{cid}")
+    public ResponseEntity<List<SpecGroup>> querySpecsByCid(@PathVariable("cid") Long cid) {
+       return  ResponseEntity.ok(specService.querySpecsByCid(cid));
+    }
+
+
 }

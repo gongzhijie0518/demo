@@ -1,0 +1,23 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: page-service
+  thymeleaf:
+    cache: false  # 关闭thymeleaf 的缓存
+  rabbitmq:
+    host: 169.254.51.251
+    username: /leyou
+    password: leyou
+    virtual-host: /leyou
+eureka:
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:10086/eureka
+logging:
+  level:
+    com.leyou: debug
+ly:
+   static:
+     itemPath: D:\Program Files\nginx-1.12.2\nginx-1.12.2\html\item

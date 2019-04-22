@@ -69,17 +69,25 @@ public class BrandService {
     public Brand queryById(Long id) {
 
         Brand brand = brandMapper.selectByPrimaryKey(id);
-        if (brand==null) {
+        if (brand == null) {
             throw new LyException(ExceptionEnum.BRAND_EDIT_ERROR);
         }
         return brand;
     }
 
-    public  List<Brand> queryBrandByCid(Long cid) {
+    public List<Brand> queryBrandByCid(Long cid) {
         List<Brand> list = brandMapper.queryByCategoryId(cid);
         if (CollectionUtils.isEmpty(list)) {
             throw new LyException(ExceptionEnum.BRAND_EDIT_ERROR);
         }
-       return list;
+        return list;
+    }
+
+    public List<Brand> queryByIds(List<Long> ids) {
+        List<Brand> list = brandMapper.selectByIdList(ids);
+        if (CollectionUtils.isEmpty(list)) {
+            throw new LyException(ExceptionEnum.BRAND_EDIT_ERROR);
+        }
+        return list;
     }
 }

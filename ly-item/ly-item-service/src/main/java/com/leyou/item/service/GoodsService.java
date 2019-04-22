@@ -2,6 +2,7 @@ package com.leyou.item.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.leyou.common.dto.CartDTO;
 import com.leyou.common.enums.ExceptionEnum;
 import com.leyou.common.exception.LyException;
 import com.leyou.common.vo.PageResult;
@@ -11,6 +12,7 @@ import com.leyou.item.mapper.SpuMapper;
 import com.leyou.item.mapper.StockMapper;
 import com.leyou.item.pojo.*;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +38,9 @@ public class GoodsService {
     private SkuMapper skuMapper;
     @Autowired
     private StockMapper stockMapper;
+    @Autowired
+    private AmqpTemplate template;
+
 
     public PageResult<Spu> querySpuByPage(Integer page, Integer rows, Boolean saleable, String key) {
         //分页查询
@@ -149,6 +154,16 @@ public class GoodsService {
         if (count != 1) {
             throw new LyException(ExceptionEnum.GOODS_SAVE_ERROR);
         }
+        //发送消息
+        String routingKey = "item.";
+        if (saleable) {
+            //发送上架消息
+            routingKey += "insert";
+        } else {
+            //下架
+            routingKey += "delete";
+        }
+        template.convertAndSend(routingKey, spu.getId());
     }
 
     public SpuDetail queryDetailBySpuId(Long spuId) {
@@ -166,6 +181,13 @@ public class GoodsService {
         if (CollectionUtils.isEmpty(skuList)) {
             throw new LyException(ExceptionEnum.GOODS_NOT_FOUND);
         }
+        //查询sku的库存 并添加到每个sku中
+        loadSkuStock(skuList);
+
+        return skuList;
+    }
+
+    private void loadSkuStock(List<Sku> skuList) {
         //获取sku的集合
         List<Long> idList = skuList
                 .stream()//把sku集合变成sku的流
@@ -181,7 +203,6 @@ public class GoodsService {
         for (Sku sku : skuList) {
             sku.setStock(map.get(sku.getId()));
         }
-        return skuList;
     }
 
     @Transactional
@@ -229,11 +250,50 @@ public class GoodsService {
         }
         //5、修改spu_detail
 
-       count = spuDetailMapper.updateByPrimaryKeySelective(spu.getSpuDetail());
+        count = spuDetailMapper.updateByPrimaryKeySelective(spu.getSpuDetail());
         if (count != 1) {
             throw new LyException(ExceptionEnum.GOODS_NOT_FOUND);
         }
         //6、新增stock和sku
-             saveSkuAndStock(spu);
+        saveSkuAndStock(spu);
+    }
+
+    public Spu querySpuById(Long id) {
+        //查询spu
+        Spu spu = spuMapper.selectByPrimaryKey(id);
+        if (spu == null) {
+            throw new LyException(ExceptionEnum.GOODS_NOT_FOUND);
+        }
+        //查询detail
+        SpuDetail spuDetail = queryDetailBySpuId(id);
+        spu.setSpuDetail(spuDetail);
+        //查询skus
+        List<Sku> skus = querySkuBySpuId(id);
+        spu.setSkus(skus);
+        return spu;
+    }
+
+    public List<Sku> querySkuByIds(List<Long> ids) {
+        List<Sku> skus = skuMapper.selectByIdList(ids);
+        if (CollectionUtils.isEmpty(skus)) {
+            throw new LyException(ExceptionEnum.GOODS_NOT_FOUND);
+        }
+        //查询库存 并添加到每个sku中
+        loadSkuStock(skus);
+        return skus;
+    }
+
+    @Transactional
+    public void decreaseStock(List<CartDTO> carts) {
+        //循环减库存需要加事物
+        for (CartDTO cart : carts) {
+            try {
+                //由于设置了数据库stock字段为无符号，不能为负数，所以可以直接减库存
+                int count = stockMapper.decreaseStock(cart.getSkuId(), cart.getNum());
+            } catch (Exception e) {
+                throw new LyException(ExceptionEnum.STOCK_NOT_ENOUGH);
+            }
+        }
+
     }
 }

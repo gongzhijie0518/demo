@@ -1,5 +1,6 @@
 package com.leyou.item.web;
 
+import com.leyou.common.dto.CartDTO;
 import com.leyou.common.mapper.BaseMapper;
 import com.leyou.common.vo.PageResult;
 import com.leyou.item.pojo.Sku;
@@ -59,26 +60,57 @@ public class GoodsController {
 
     /**
      * 通过spuid查询spuDetail
+     *
      * @param spuId
      * @return
      */
     @GetMapping("spu/detail/{spuId}")
-    public ResponseEntity<SpuDetail> queryDetailBySpuId(@PathVariable("spuId")Long spuId){
+    public ResponseEntity<SpuDetail> queryDetailBySpuId(@PathVariable("spuId") Long spuId) {
 
         return ResponseEntity.ok(goodsService.queryDetailBySpuId(spuId));
     }
 
     @GetMapping("sku/list")
-    public ResponseEntity<List<Sku>> querySkuBySpuId(@RequestParam("id")Long spuId){
-       return ResponseEntity.ok(goodsService.querySkuBySpuId(spuId));
+    public ResponseEntity<List<Sku>> querySkuBySpuId(@RequestParam("id") Long spuId) {
+        return ResponseEntity.ok(goodsService.querySkuBySpuId(spuId));
 
     }
+
     @PutMapping("goods")
-    public ResponseEntity<Void> updateGoods(@RequestBody Spu spu){
+    public ResponseEntity<Void> updateGoods(@RequestBody Spu spu) {
         goodsService.updateGoods(spu);
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    /**
+     * 根据spuId查询spu
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/spu/{id}")
+    public ResponseEntity<Spu> querySpuById(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(goodsService.querySpuById(id));
+    }
 
+    /**
+     * 根据sku的集合批量查询sku
+     * @param ids
+     * @return
+     */
+    @GetMapping("sku/list/ids")
+    public ResponseEntity<List<Sku>> querySkuByIds(@RequestParam("ids")List<Long> ids) {
+         return ResponseEntity.ok(goodsService.querySkuByIds(ids));
+    }
+
+    /**
+     * 批量减库存
+     * @param carts
+     */
+    @PostMapping("/stock/decrease")
+    public ResponseEntity<Void> decrease(@RequestBody List<CartDTO> carts){
+      goodsService.decreaseStock(carts);
+      return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }

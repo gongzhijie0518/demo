@@ -5,6 +5,7 @@ import tk.mybatis.mapper.annotation.KeySql;
 
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.List;
 
 @Table(name = "tb_spec_group")
 @Data
@@ -17,4 +18,5 @@ public class SpecGroup {
     private Long cid;
 
     private String name;
+    private List<SpecParam> params;
 }

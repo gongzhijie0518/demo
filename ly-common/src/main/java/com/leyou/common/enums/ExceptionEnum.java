@@ -15,6 +15,14 @@ public enum ExceptionEnum {
     GOODS_EDIT_ERROR(400,"商品参数有误"),
     FILE_UPLOAD_ERROR(500,"文件上传异常"),
     INVALID_FILE_TYPE(400,"无效的文件类型"),
+    SEND_MESSAGE_ERROR(500,"短信发送失败"),
+    ORDER_INSERT_ERROR(500,"新增订单失败"),
+    STOCK_NOT_ENOUGH(500,"库存不足"),
+    DATA_TYPE_ERROR(400,"数据类型错误"),
+    INVALID_USERNAME_PASSWORD(400,"用户名或密码错误"),
+    UNAUTHORIZED(401,"没有访问权限"),
+    CART_IS_EMPTY(404,"购物车没有商品"),
+    ORDER_NOT_FOUND(404,"订单不存在"),
     ;
 
     private int status;
